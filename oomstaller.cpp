@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <unordered_set>
 #include <set>
@@ -37,14 +38,14 @@ int maxParallel = 0, maxParallelThrash = 1;
 bool showStat = false;
 std::unordered_map<int, long> statInfo;
 
-std::uint64_t readMemInfo(const std::string &s) {
+std::uint64_t readMemInfo(const std::string_view &s) {
   std::FILE *fp = std::fopen("/proc/meminfo", "r");
   if (!fp) throw(std::runtime_error("readMeminfo() : could not open /proc/meminfo"));
   std::vector<char> line(1024);
 
   while(!std::feof(fp)) {
     if (std::fgets(line.data(), line.size(), fp) == NULL) break;
-    if (std::strncmp(line.data(), s.c_str(), s.size()) == 0) {
+    if (std::strncmp(line.data(), s.data(), s.size()) == 0) {
       unsigned long long ull;
       if (std::sscanf(line.data() + s.size(), " %llu", &ull) != 1)
 	throw(std::runtime_error("readMeminfo() : /proc/meminfo format error"));
@@ -52,7 +53,7 @@ std::uint64_t readMemInfo(const std::string &s) {
       return ull;
     }
   }
-  throw(std::runtime_error(("readMemInfo() : /proc/meminfo does not have entry for " + s).c_str()));
+  throw(std::runtime_error(std::string("readMemInfo() : /proc/meminfo does not have entry for ") + s.data()));
 }
 
 struct ProcInfo {
@@ -314,8 +315,8 @@ void loop(std::shared_ptr<std::thread> childTh) {
 
 int childExitCode = -1;
 
-void execChild(std::string cmd) {
-  childExitCode = WEXITSTATUS(system(cmd.c_str()));
+void execChild(const std::string_view &cmd) {
+  childExitCode = WEXITSTATUS(system(cmd.data()));
   exiting = true;
 
   std::unique_lock<std::mutex> lock(mtx);
@@ -349,8 +350,8 @@ void handler(int n) {
   handlerTh = std::make_shared<std::thread>(handlerThread, n);
 }
 
-void showUsage(const std::string& argv0, const std::string& mes = "") {
-  if (mes != "") std::cerr << mes << std::endl << std::endl;
+void showUsage(const std::string_view& argv0, const std::string_view& mes = std::string_view{}) {
+  if (! mes.empty()) std::cerr << mes << std::endl << std::endl;
   std::cerr << std::endl;
   std::cerr << "NAME" << std::endl;
   std::cerr << "     oomstaller - suppress swap thrashing at build time" << std::endl;
@@ -403,7 +404,7 @@ void showUsage(const std::string& argv0, const std::string& mes = "") {
 }
 
 int main(int argc, char **argv) {
-  if (argc < 2) showUsage(argv[0], "");
+  if (argc < 2) showUsage(argv[0]);
 
   int nextArg;
   for(nextArg = 1;nextArg < argc;nextArg++) {
@@ -445,7 +446,7 @@ int main(int argc, char **argv) {
     }
   }
 
-  if (nextArg >= argc) showUsage(argv[0], "");
+  if (nextArg >= argc) showUsage(argv[0]);
 
   if (getProcesses().count(pid) == 0) {
     std::cerr << argv[0] << " : Could not retrieve process information of oomstaller" << std::endl;
