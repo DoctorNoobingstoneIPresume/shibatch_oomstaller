@@ -222,8 +222,11 @@ int childExitCode = -1;
 void execChild(const std::string_view &cmd) {
   childExitCode = WEXITSTATUS(system(cmd.data()));
 
-  std::unique_lock<std::mutex> lock(mtx);
-  exiting = true;
+  {
+    std::unique_lock<std::mutex> lock(mtx);
+    exiting = true;
+  }
+
   condvar.notify_all();
 }
 
