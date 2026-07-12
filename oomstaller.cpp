@@ -410,28 +410,28 @@ int main(int argc, char **argv) {
 
   int nextArg;
   for(nextArg = 1;nextArg < argc;nextArg++) {
-    if (std::string(argv[nextArg]) == "--max-parallel") {
+    if (std::string_view(argv[nextArg]) == "--max-parallel") {
       if (nextArg+1 >= argc) showUsage(argv[0]);
       char *p;
       maxParallel = strtol(argv[nextArg+1], &p, 0);
       if (p == argv[nextArg+1] || *p || maxParallel < 0)
 	showUsage(argv[0], "A non-negative integer is expected after --max-parallel.");
       nextArg++;
-    } else if (std::string(argv[nextArg]) == "--max-parallel-thrash") {
+    } else if (std::string_view(argv[nextArg]) == "--max-parallel-thrash") {
       if (nextArg+1 >= argc) showUsage(argv[0]);
       char *p;
       maxParallelThrash = std::strtol(argv[nextArg+1], &p, 0);
       if (p == argv[nextArg+1] || *p || maxParallelThrash < 0)
 	showUsage(argv[0], "A non-negative integer is expected after --max-parallel-thrash.");
       nextArg++;
-    } else if (std::string(argv[nextArg]) == "--period") {
+    } else if (std::string_view(argv[nextArg]) == "--period") {
       if (nextArg+1 >= argc) showUsage(argv[0]);
       char *p;
       period = std::strtod(argv[nextArg+1], &p);
       if (p == argv[nextArg+1] || *p || period <= 0)
 	showUsage(argv[0], "A positive value is expected after --period.");
       nextArg++;
-    } else if (std::string(argv[nextArg]) == "--uid") {
+    } else if (std::string_view(argv[nextArg]) == "--uid") {
       if (nextArg+1 >= argc) showUsage(argv[0]);
       char *p;
       long l = std::strtol(argv[nextArg+1], &p, 0);
@@ -439,9 +439,9 @@ int main(int argc, char **argv) {
       if (p == argv[nextArg+1] || *p || l < 0)
 	showUsage(argv[0], "A non-negative integer is expected after --uid.");
       nextArg++;
-    } else if (std::string(argv[nextArg]) == "--show-stat") {
+    } else if (std::string_view(argv[nextArg]) == "--show-stat") {
       showStat = true;
-    } else if (std::string(argv[nextArg]).substr(0, 2) == "--") {
+    } else if (std::string_view(argv[nextArg]).substr(0, 2) == "--") {
       showUsage(argv[0], std::string("Unrecognized option : ") + argv[nextArg]);
     } else {
       break;
