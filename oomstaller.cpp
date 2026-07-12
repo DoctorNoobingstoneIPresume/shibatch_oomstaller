@@ -85,7 +85,7 @@ bool isTarget(std::unordered_map<int, ProcInfo> &map, const ProcInfo *pc) {
 }
 
 std::unordered_set<int> stoppedProcs;
-volatile bool exiting = false;
+bool exiting = false;
 std::mutex mtx;
 std::condition_variable condvar;
 
@@ -113,7 +113,7 @@ void loop(std::shared_ptr<std::thread> childTh) {
   long lastSwapFree = readMemInfo("SwapFree:");
   int thrashTimer = 0;
 
-  while(!exiting) {
+  for (; ! exiting; condvar.wait_for(lock, std::chrono::milliseconds((long)(period * 1000)), [&] () { return exiting; })) {
     std::set<ProcInfo, bool(*)(const ProcInfo &lhs, const ProcInfo &rhs)>
     proc { [](const ProcInfo &lhs, const ProcInfo &rhs) {
       if (lhs.starttime > rhs.starttime) return true;
@@ -214,10 +214,6 @@ void loop(std::shared_ptr<std::thread> childTh) {
 
     if (thrashTimer > 0 || freeMem == 0) statInfo[-1]++;
     statInfo[nRunningProcs]++;
-
-    //
-
-    condvar.wait_for(lock, std::chrono::milliseconds((long)(period * 1000)));
   }
 }
 
