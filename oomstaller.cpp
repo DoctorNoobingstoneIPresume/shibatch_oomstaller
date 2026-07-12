@@ -12,6 +12,7 @@
 #include <condition_variable>
 #include <memory>
 #include <chrono>
+#include <stdexcept>
 
 #include <cstdio>
 #include <cstdint>
