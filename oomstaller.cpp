@@ -155,7 +155,7 @@ std::unordered_map<int, ProcInfo> getProcesses() {
       try {
 	ProcInfo pi(fp, entry->d_name);
 	ret[pi.pid] = pi;
-      } catch(std::exception &ex) {}
+      } catch(const std::exception &ex) {}
     }
 
     std::fclose(fp);
@@ -332,7 +332,7 @@ void handlerThread(int n) {
       kill(-e.second.pgrp, SIGCONT);
       kill(-e.second.pgrp, n);
     }
-  } catch(std::exception &ex) {
+  } catch(const std::exception &ex) {
     std::cerr << ex.what() << std::endl;
   }
 
@@ -479,7 +479,7 @@ int main(int argc, char **argv) {
 
   try {
     loop(childTh);
-  } catch(std::exception &ex) {
+  } catch(const std::exception &ex) {
     std::cerr << argv[0] << " : " << ex.what() << std::endl;
     kill(0, SIGTERM);
   }
